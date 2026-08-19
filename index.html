@@ -2,19 +2,41 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Chanel Vs Motoboys</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Chanel Vs Motoboy</h1>
-    <p>Pontuação: <span id="score">0</span></p>
-    <canvas id="gameCanvas"></canvas>
+    <div id="game-container">
+        <header>
+            <h1>Chanel Vs Motoboy</h1>
+            <div class="stats">
+                <span class="stat-box">Fase: <strong id="phase">1</strong>/3</span>
+                <span class="stat-box">Pontos: <strong id="score">0</strong>/100</span>
+            </div>
+        </header>
 
-    <div id="mobile-controls">
-        <button id="up-btn"><i class="fas fa-chevron-up"></i></button>
-        <button id="down-btn"><i class="fas fa-chevron-down"></i></button>
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Tela de Vitória -->
+            <div id="victory-screen" class="hidden">
+                <div class="victory-content">
+                    <h2>🎉 Parabéns! Você Venceu! 🎉</h2>
+                    <p>A Chanel conseguiu vencer todos os motoboys!</p>
+                    <div class="video-wrapper">
+                        <video id="victory-video" src="chanel.mp4" playsinline loop muted></video>
+                    </div>
+                    <button id="restart-btn"><i class="fas fa-redo"></i> Jogar Novamente</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-controls">
+            <button id="up-btn"><i class="fas fa-chevron-up"></i></button>
+            <button id="down-btn"><i class="fas fa-chevron-down"></i></button>
+        </div>
     </div>
 
     <script src="script.js"></script>
