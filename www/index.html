@@ -10,7 +10,10 @@
 <body>
     <div id="game-container">
         <header>
-            <h1>Chanel Vs Motoboy</h1>
+            <div class="header-top">
+                <h1>Chanel Vs Motoboy</h1>
+                <button id="mute-btn" title="Mutar/Desmutar Som"><i class="fas fa-volume-up"></i></button>
+            </div>
             <div class="stats">
                 <span class="stat-box">Fase: <strong id="phase">1</strong>/3</span>
                 <span class="stat-box">Pontos: <strong id="score">0</strong>/100</span>
@@ -26,7 +29,8 @@
                     <h2>🎉 Parabéns! Você Venceu! 🎉</h2>
                     <p>A Chanel conseguiu vencer todos os motoboys!</p>
                     <div class="video-wrapper">
-                        <video id="victory-video" src="chanel.mp4" playsinline loop muted></video>
+                        <!-- Adicionado autoplay, loop, playsinline, webkit-playsinline e controle para garantir que rode -->
+                        <video id="victory-video" src="chanel.mp4" playsinline webkit-playsinline loop muted autoplay></video>
                     </div>
                     <button id="restart-btn"><i class="fas fa-redo"></i> Jogar Novamente</button>
                 </div>
@@ -34,8 +38,8 @@
         </div>
 
         <div id="mobile-controls">
-            <button id="up-btn"><i class="fas fa-chevron-up"></i></button>
-            <button id="down-btn"><i class="fas fa-chevron-down"></i></button>
+            <button id="left-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="right-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 

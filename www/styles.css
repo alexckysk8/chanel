@@ -25,40 +25,70 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
-    max-width: 900px;
-    height: 100%;
-    padding: 10px;
+    max-width: 480px; /* Limitado para manter proporção de celular */
+    height: 100vh;
+    height: -webkit-fill-available;
+    padding: 15px 10px;
 }
 
 header {
-    text-align: center;
     width: 100%;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 5px;
+    padding: 0 10px;
 }
 
 h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #00d4ff;
-    margin: 0 0 5px 0;
+    margin: 0;
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+    text-align: left;
+}
+
+#mute-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    color: #00d4ff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+#mute-btn:active {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(0.9);
 }
 
 .stats {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-bottom: 5px;
+    gap: 12px;
+    width: 100%;
 }
 
 .stat-box {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     background: rgba(255, 255, 255, 0.08);
-    padding: 6px 16px;
+    padding: 6px 14px;
     border-radius: 20px;
     border: 1px solid rgba(0, 212, 255, 0.3);
-    min-width: 130px;
+    flex: 1;
     text-align: center;
 }
 
@@ -69,9 +99,11 @@ h1 {
 #canvas-container {
     position: relative;
     width: 100%;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 10px 0;
 }
 
 canvas {
@@ -80,7 +112,8 @@ canvas {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     border-radius: 8px;
     max-width: 100%;
-    height: auto;
+    max-height: 100%;
+    aspect-ratio: 9 / 16; /* Força proporção vertical */
     display: block;
 }
 
@@ -91,7 +124,7 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -108,12 +141,12 @@ canvas {
 }
 
 .victory-content {
-    background: rgba(30, 30, 30, 0.95);
+    background: rgba(30, 30, 30, 0.98);
     border: 2px solid #00d4ff;
     border-radius: 12px;
     padding: 20px;
     max-width: 90%;
-    width: 420px;
+    width: 320px;
     text-align: center;
     box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
     display: flex;
@@ -124,18 +157,19 @@ canvas {
 .victory-content h2 {
     color: #00d4ff;
     margin-top: 0;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 .victory-content p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin-bottom: 15px;
     color: #ddd;
 }
 
 .video-wrapper {
     width: 100%;
-    max-height: 200px;
+    aspect-ratio: 9 / 16; /* Mantém o vídeo na proporção vertical */
+    max-height: 250px;
     overflow: hidden;
     border-radius: 8px;
     margin-bottom: 15px;
@@ -143,12 +177,13 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .video-wrapper video {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 #restart-btn {
@@ -156,7 +191,7 @@ canvas {
     color: #121212;
     border: none;
     padding: 12px 24px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: bold;
     border-radius: 25px;
     cursor: pointer;
@@ -179,15 +214,16 @@ canvas {
 #mobile-controls {
     display: flex;
     justify-content: center;
-    gap: 40px;
-    margin-top: 15px;
+    gap: 50px;
+    margin-top: 5px;
     width: 100%;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 #mobile-controls button {
-    width: 70px;
-    height: 70px;
-    font-size: 30px;
+    width: 65px;
+    height: 65px;
+    font-size: 26px;
     background-color: rgba(0, 212, 255, 0.15);
     border: 2px solid #00d4ff;
     color: #00d4ff;
@@ -206,27 +242,16 @@ canvas {
 }
 
 /* Responsividade de Tela */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     h1 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
-    .stat-box {
-        font-size: 0.9rem;
-        padding: 4px 12px;
-        min-width: 100px;
+    .victory-content {
+        padding: 15px;
     }
     #mobile-controls button {
         width: 60px;
         height: 60px;
-        font-size: 24px;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.2rem;
-    }
-    .stats {
-        gap: 10px;
+        font-size: 22px;
     }
 }

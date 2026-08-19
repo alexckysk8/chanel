@@ -7,36 +7,41 @@ const phaseElement = document.getElementById('phase');
 const victoryScreen = document.getElementById('victory-screen');
 const victoryVideo = document.getElementById('victory-video');
 const restartBtn = document.getElementById('restart-btn');
+const muteBtn = document.getElementById('mute-btn');
 
 let score = 0;
 let phase = 1;
 let isGameOver = false;
+let isMuted = localStorage.getItem('gameMuted') === 'true';
 
-// Ajuste do tamanho do canvas
+// Ajuste do tamanho do canvas para o formato vertical (9:16)
 function resizeCanvas() {
-    // Definir proporção padrão landscape para o jogo (ex: 16:9 ou similar)
-    const maxWidth = window.innerWidth * 0.95;
-    const maxHeight = window.innerHeight * 0.6;
+    const container = document.getElementById('canvas-container');
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
     
-    // Proporção ideal
-    const targetWidth = 800;
-    const targetHeight = 450;
-    const aspectRatio = targetWidth / targetHeight;
-
-    let width = maxWidth;
-    let height = width / aspectRatio;
-
-    if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
+    // Proporção vertical 9:16
+    const targetRatio = 9 / 16;
+    
+    let width = containerWidth;
+    let height = width / targetRatio;
+    
+    if (height > containerHeight) {
+        height = containerHeight;
+        width = height * targetRatio;
     }
-
+    
     canvas.width = width;
     canvas.height = height;
 }
 
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    // Reposiciona Chanel no fundo após redimensionar
+    if (chanel) {
+        chanel.y = canvas.height - chanel.height - 20;
+    }
+});
 
 const chanelImage = new Image();
 chanelImage.src = 'chanel.png';
@@ -47,33 +52,51 @@ motoboyImage.src = 'motoboy.png';
 // Som de latido
 const barkSound = new Audio('latido.mp3');
 
-// Posições e velocidades
-let chanel = { x: 50, y: canvas.height / 2 - 25, width: 60, height: 60, speed: 6 };
+// Posições e velocidades (Movimento Horizontal)
+let chanel = { x: 0, y: 0, width: 60, height: 60, speed: 6 };
 let motoboys = [];
 let spawnTimer = null;
-let moveDirection = 0; // -1 = cima, 1 = baixo, 0 = parado
+let moveDirection = 0; // -1 = esquerda, 1 = direita, 0 = parado
+
+// Inicializa ou atualiza o estado de mute
+function updateMuteState() {
+    barkSound.muted = isMuted;
+    victoryVideo.muted = isMuted;
+    
+    if (muteBtn) {
+        muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    }
+    localStorage.setItem('gameMuted', isMuted);
+}
+
+if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+        isMuted = !isMuted;
+        updateMuteState();
+    });
+}
 
 function createMotoboy() {
     if (isGameOver) return;
-    const x = canvas.width;
-    // Tamanho proporcional ao canvas
-    const size = (canvas.height * 0.15) + Math.random() * (canvas.height * 0.05);
-    const y = Math.random() * (canvas.height - size);
     
-    // Velocidade de acordo com a fase e pontuação
-    let baseSpeed = 3;
-    let speedIncrement = 0.03;
+    const size = canvas.width * 0.18; // Tamanho proporcional à largura do canvas
+    const x = Math.random() * (canvas.width - size);
+    const y = -size; // Começa fora da tela no topo
+    
+    // Velocidade de queda de acordo com a fase e pontuação
+    let baseSpeed = 3.5;
+    let speedIncrement = 0.04;
 
     if (phase === 2) {
-        baseSpeed = 5;
-        speedIncrement = 0.04;
+        baseSpeed = 5.5;
+        speedIncrement = 0.05;
     } else if (phase === 3) {
         baseSpeed = 7.5;
-        speedIncrement = 0.05;
+        speedIncrement = 0.06;
     }
 
     const currentSpeed = baseSpeed + (score * speedIncrement);
-    const speed = currentSpeed * (0.85 + Math.random() * 0.3); // Pequena variação aleatória de velocidade
+    const speed = currentSpeed * (0.85 + Math.random() * 0.3); // Variação aleatória
     
     motoboys.push({ x, y, width: size, height: size, speed });
 }
@@ -82,12 +105,12 @@ function scheduleNextMotoboy() {
     if (isGameOver) return;
     if (spawnTimer) clearTimeout(spawnTimer);
 
-    // Ajusta frequência de spawn com base na fase e pontuação
-    let baseInterval = 1200;
-    if (phase === 2) baseInterval = 900;
-    if (phase === 3) baseInterval = 700;
+    // Ajusta frequência de spawn de acordo com a fase
+    let baseInterval = 1300;
+    if (phase === 2) baseInterval = 1000;
+    if (phase === 3) baseInterval = 800;
 
-    const intervalReduction = Math.min(score * 5, baseInterval * 0.5);
+    const intervalReduction = Math.min(score * 6, baseInterval * 0.5);
     const randomDelay = (baseInterval - intervalReduction) + Math.random() * 500;
     
     spawnTimer = setTimeout(() => {
@@ -99,10 +122,10 @@ function scheduleNextMotoboy() {
 function setupControls() {
     // Teclado - Pressionar
     window.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowUp') {
+        if (e.key === 'ArrowLeft') {
             e.preventDefault();
             moveDirection = -1;
-        } else if (e.key === 'ArrowDown') {
+        } else if (e.key === 'ArrowRight') {
             e.preventDefault();
             moveDirection = 1;
         }
@@ -110,19 +133,19 @@ function setupControls() {
 
     // Teclado - Soltar
     window.addEventListener('keyup', function (e) {
-        if (e.key === 'ArrowUp' && moveDirection === -1) {
+        if (e.key === 'ArrowLeft' && moveDirection === -1) {
             moveDirection = 0;
-        } else if (e.key === 'ArrowDown' && moveDirection === 1) {
+        } else if (e.key === 'ArrowRight' && moveDirection === 1) {
             moveDirection = 0;
         }
     });
 
-    // Suporte a Toque na tela (Canvas)
+    // Suporte a toque direto no Canvas (esquerda/direita)
     canvas.addEventListener('touchstart', function (e) {
         e.preventDefault();
         const rect = canvas.getBoundingClientRect();
-        const touchY = e.touches[0].clientY - rect.top;
-        if (touchY < chanel.y + chanel.height / 2) {
+        const touchX = e.touches[0].clientX - rect.left;
+        if (touchX < canvas.width / 2) {
             moveDirection = -1;
         } else {
             moveDirection = 1;
@@ -134,16 +157,16 @@ function setupControls() {
         moveDirection = 0;
     }, { passive: false });
 
-    // Botões físicos virtuais na tela
-    const upBtn = document.getElementById('up-btn');
-    const downBtn = document.getElementById('down-btn');
+    // Botões físicos virtuais na tela (Esquerda/Direita)
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
     
-    if (upBtn && downBtn) {
-        const pressUp = (e) => {
+    if (leftBtn && rightBtn) {
+        const pressLeft = (e) => {
             e.preventDefault();
             moveDirection = -1;
         };
-        const pressDown = (e) => {
+        const pressRight = (e) => {
             e.preventDefault();
             moveDirection = 1;
         };
@@ -153,20 +176,20 @@ function setupControls() {
         };
 
         // Eventos mouse
-        upBtn.addEventListener('mousedown', pressUp);
-        upBtn.addEventListener('mouseup', stopMove);
-        upBtn.addEventListener('mouseleave', stopMove);
+        leftBtn.addEventListener('mousedown', pressLeft);
+        leftBtn.addEventListener('mouseup', stopMove);
+        leftBtn.addEventListener('mouseleave', stopMove);
         
-        downBtn.addEventListener('mousedown', pressDown);
-        downBtn.addEventListener('mouseup', stopMove);
-        downBtn.addEventListener('mouseleave', stopMove);
+        rightBtn.addEventListener('mousedown', pressRight);
+        rightBtn.addEventListener('mouseup', stopMove);
+        rightBtn.addEventListener('mouseleave', stopMove);
 
         // Eventos touch
-        upBtn.addEventListener('touchstart', pressUp, { passive: false });
-        upBtn.addEventListener('touchend', stopMove, { passive: false });
+        leftBtn.addEventListener('touchstart', pressLeft, { passive: false });
+        leftBtn.addEventListener('touchend', stopMove, { passive: false });
         
-        downBtn.addEventListener('touchstart', pressDown, { passive: false });
-        downBtn.addEventListener('touchend', stopMove, { passive: false });
+        rightBtn.addEventListener('touchstart', pressRight, { passive: false });
+        rightBtn.addEventListener('touchend', stopMove, { passive: false });
     }
 
     // Botão de reiniciar
@@ -176,20 +199,21 @@ function setupControls() {
 }
 
 function updateChanelPosition() {
-    if (moveDirection === -1 && chanel.y > 0) {
-        chanel.y -= chanel.speed;
-    } else if (moveDirection === 1 && chanel.y < canvas.height - chanel.height) {
-        chanel.y += chanel.speed;
+    if (moveDirection === -1 && chanel.x > 0) {
+        chanel.x -= chanel.speed;
+    } else if (moveDirection === 1 && chanel.x < canvas.width - chanel.width) {
+        chanel.x += chanel.speed;
     }
 }
 
 function moveMotoboys() {
     for (let i = motoboys.length - 1; i >= 0; i--) {
         const motoboy = motoboys[i];
-        motoboy.x -= motoboy.speed;
+        // Move para baixo (vertical)
+        motoboy.y += motoboy.speed;
 
-        // Se sair da tela, remove
-        if (motoboy.x + motoboy.width < 0) {
+        // Se sair da tela na parte inferior, remove
+        if (motoboy.y > canvas.height) {
             motoboys.splice(i, 1);
             continue;
         }
@@ -201,8 +225,10 @@ function moveMotoboys() {
             chanel.height + chanel.y > motoboy.y) {
             
             // Som de latido
-            barkSound.currentTime = 0;
-            barkSound.play().catch(e => console.log("Erro ao tocar som:", e));
+            if (!isMuted) {
+                barkSound.currentTime = 0;
+                barkSound.play().catch(e => console.log("Erro ao tocar latido:", e));
+            }
 
             // Remove motoboy e pontua
             motoboys.splice(i, 1);
@@ -216,10 +242,8 @@ function moveMotoboys() {
                     score = 0;
                     scoreElement.textContent = score;
                     phaseElement.textContent = phase;
-                    // Limpa motoboys para dar uma pausa visual e iniciar a nova fase
                     motoboys = [];
                 } else {
-                    // Ganhou a Fase 3
                     triggerVictory();
                 }
             }
@@ -236,13 +260,18 @@ function triggerVictory() {
     victoryScreen.classList.remove('hidden');
     
     // Toca o vídeo chanel.mp4
-    victoryVideo.muted = false;
+    victoryVideo.muted = isMuted;
     victoryVideo.currentTime = 0;
-    victoryVideo.play().catch(err => {
-        console.log("Autoplay com som bloqueado, tentando mudo:", err);
-        victoryVideo.muted = true;
-        victoryVideo.play();
-    });
+    
+    // Tenta reproduzir o vídeo. Se falhar (por restrição de som do navegador), tenta mutado.
+    const playPromise = victoryVideo.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(err => {
+            console.log("Falha ao tocar vídeo com som. Forçando mudo:", err);
+            victoryVideo.muted = true;
+            victoryVideo.play();
+        });
+    }
 }
 
 function resetGame() {
@@ -254,14 +283,17 @@ function resetGame() {
     scoreElement.textContent = score;
     phaseElement.textContent = phase;
     
-    // Ajusta o tamanho inicial de Chanel proporcional ao canvas
-    const size = Math.min(canvas.width * 0.12, 60);
+    // Configura canvas inicialmente
+    resizeCanvas();
+    
+    // Chanel tamanho proporcional ao canvas horizontal
+    const size = Math.min(canvas.width * 0.16, 65);
     chanel = { 
-        x: 50, 
-        y: canvas.height / 2 - size / 2, 
+        x: canvas.width / 2 - size / 2, 
+        y: canvas.height - size - 20, 
         width: size, 
         height: size, 
-        speed: Math.max(canvas.height * 0.015, 6) 
+        speed: Math.max(canvas.width * 0.02, 6) 
     };
 
     motoboys = [];
@@ -270,6 +302,8 @@ function resetGame() {
     victoryVideo.pause();
     victoryVideo.currentTime = 0;
     victoryScreen.classList.add('hidden');
+
+    updateMuteState();
 
     if (spawnTimer) clearTimeout(spawnTimer);
     scheduleNextMotoboy();
@@ -284,10 +318,10 @@ function gameLoop() {
         moveMotoboys();
     }
 
-    // Desenha Chanel
+    // Desenha Chanel no fundo
     ctx.drawImage(chanelImage, chanel.x, chanel.y, chanel.width, chanel.height);
 
-    // Desenha Motoboys
+    // Desenha Motoboys caindo
     motoboys.forEach(motoboy => {
         ctx.drawImage(motoboyImage, motoboy.x, motoboy.y, motoboy.width, motoboy.height);
     });
