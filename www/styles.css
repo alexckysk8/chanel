@@ -241,6 +241,14 @@ canvas {
     transform: scale(0.9);
 }
 
+#left-btn i {
+    transform: rotate(-25deg);
+}
+
+#right-btn i {
+    transform: rotate(25deg);
+}
+
 /* Responsividade de Tela */
 @media (max-width: 480px) {
     h1 {
